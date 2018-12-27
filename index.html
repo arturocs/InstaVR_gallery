@@ -10,9 +10,9 @@
 
 <body>
 	<a-scene>
-			<a-assets id="assets">
-					<img id="sky" src="./sky.jpg">
-				</a-assets>
+		<a-assets id="assets">
+			<img id="sky" src="./sky.jpg">
+		</a-assets>
 		<a-entity id="anillo-superior">
 			<a-image id="im0" position="0 0.5 -2" src="" visible="false" look-at="#camera"></a-image>
 			<a-image id="im1" position="-1.732 0.5 -1" src="" visible="false" look-at="#camera"></a-image>
@@ -39,19 +39,19 @@
 </body>
 
 <script>
-	if (window.location.href.split('?')[1] !== undefined) {
-		var url = 'https://www.instagram.com/' + window.location.href.split('?')[1]
-		var txt = document.querySelector("#texto")
+	var txt = document.querySelector("#texto")
+	var fotemp, im, skybox, url
+	var fotos, fotos_trim = []
+	var usuario = window.location.href.split('?')[1]
+	if (usuario !== undefined) {
+		url = 'https://www.instagram.com/' + usuario
 		const Http = new XMLHttpRequest();
 		Http.open("GET", url);
 		Http.send();
 		Http.onreadystatechange = function () {
 			if (this.readyState == 4 && this.status == 200) {
-				console.log(Http.responseText)
-				var fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
+				fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
 				if (fotos !== null) {
-					var fotemp, im, skybox
-					var fotos_trim = []
 					fotos.forEach(function (foto) {
 						fotemp = foto.split(':\"')[1]
 						fotos_trim.push(fotemp.substring(0, fotemp.length - 1))
@@ -61,7 +61,7 @@
 						im.setAttribute("src", fotos_trim[i])
 						im.setAttribute("visible", "true")
 					}
-					skybox=document.querySelector("#skybox")
+					skybox = document.querySelector("#skybox")
 					skybox.setAttribute("color", "white")
 					skybox.setAttribute("src", "#sky")
 					document.querySelector("#texto").setAttribute("visible", "false")
