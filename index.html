@@ -59,13 +59,13 @@
 		<a-camera id="camera" wasd-controls-enabled="false" look-controls>
 			<a-text id="texto" value="Cargando" position="-0.6 0 -2" width="6" visible="true"></a-text>
 		</a-camera>
-		<a-sky id="skybox" color="black"></a-sky>
+		<a-sky id="skybox" color="black" src="#sky"></a-sky>
 	</a-scene>
 </body>
 
 <script>
 	var txt = document.querySelector("#texto")
-	var fotemp, im, skybox, url
+	var fotemp, im, url
 	var fotos, fotos_trim = []
 	var usuario = window.location.href.split('?')[1]
 	if (usuario !== undefined) {
@@ -74,7 +74,7 @@
 		Http.open("GET", url);
 		Http.send();
 		Http.onreadystatechange = function () {
-			if (this.readyState == 4 && this.status == 200) {
+			if (this.readyState == 4 && (this.status == 200 || this.status == 404)) {
 				fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
 				if (fotos !== null) {
 					fotos.forEach(function (foto) {
@@ -86,17 +86,12 @@
 						im.setAttribute("src", fotos_trim[i])
 						im.setAttribute("visible", "true")
 					}
-					skybox = document.querySelector("#skybox")
-					skybox.setAttribute("color", "white")
-					skybox.setAttribute("src", "#sky")
-					document.querySelector("#texto").setAttribute("visible", "false")
+					document.querySelector("#skybox").setAttribute("color", "white")
+					txt.setAttribute("visible", "false")
 				} else {
 					txt.setAttribute("position", "-0.2 0 -2")
 					txt.setAttribute("value", "Error")
 				}
-			} else {
-				txt.setAttribute("position", "-0.2 0 -2")
-				txt.setAttribute("value", "Error")
 			}
 		}
 	} else {
