@@ -78,9 +78,9 @@
 	function control_anim() {
 		rot_sup = anillo_sup.getAttribute('rotation').y
 		rot_inf = anillo_inf.getAttribute('rotation').y
-		touchCount++;
-
-		if (touchCount % 2 == 0) {
+		
+		
+		if (touchCount%2==1) {
 			anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
 			anillo_sup.lastElementChild.setAttribute('dur', '120000')
 			anillo_sup.lastElementChild.setAttribute('to', '0 360 0')
@@ -90,17 +90,25 @@
 			anillo_inf.lastElementChild.setAttribute('dur', '120000')
 			anillo_inf.lastElementChild.setAttribute('to', '0 -360 0')
 			anillo_inf.lastElementChild.setAttribute('easing', 'linear')
+			window.setTimeout(sumar, 500);
 		} else {
 			anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
 			anillo_sup.lastElementChild.setAttribute('easing', 'ease-out')
-			anillo_sup.lastElementChild.setAttribute('to', '0 ' + (rot_sup + 1) + ' 0')
+			anillo_sup.lastElementChild.setAttribute('to', '0 ' + (rot_sup + 0.5) + ' 0')
 			anillo_sup.lastElementChild.setAttribute('dur', '1000')
 
 			anillo_inf.lastElementChild.setAttribute('from', '0 ' + rot_inf + ' 0')
 			anillo_inf.lastElementChild.setAttribute('easing', 'ease-out')
-			anillo_inf.lastElementChild.setAttribute('to', '0 ' + (rot_inf - 1) + ' 0')
+			anillo_inf.lastElementChild.setAttribute('to', '0 ' + (rot_inf - 0.5) + ' 0')
 			anillo_inf.lastElementChild.setAttribute('dur', '1000')
-			window.setTimeout(parar, 1000);
+			window.setTimeout(parar, 500);
+		}
+	}
+
+	function sumar() {
+		touchCount++;
+		if(anillo_sup.lastElementChild.getAttribute('dur')==1000 && touchCount%2==0){
+			touchCount++;
 		}
 	}
 
@@ -111,8 +119,9 @@
 		anillo_inf.lastElementChild.setAttribute('to', '0 ' + rot_inf + ' 0')
 		anillo_inf.lastElementChild.setAttribute('from', '0 ' + rot_inf + ' 0')
 		anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
+		sumar();
+		
 	}
-
 
 	if (usuario !== undefined) {
 		url = 'https://www.instagram.com/' + usuario
