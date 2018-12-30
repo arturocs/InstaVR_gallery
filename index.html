@@ -6,6 +6,7 @@
 	<title>Insta VR</title>
 	<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
 	<script src="https://unpkg.com/aframe-look-at-component@0.7.0/dist/aframe-look-at-component.min.js"></script>
+	<script src="https://unpkg.com/aframe-animation-component@^5.1.2/dist/aframe-animation-component.min.js"></script>
 </head>
 
 <body>
@@ -14,7 +15,7 @@
 			<img id="sky" src="./sky.jpg">
 		</a-assets>
 		<a-light type="ambient" color="white"></a-light>
-		<a-entity id="anillo-superior">
+		<a-entity id="anillo-superior" animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 360 0; easing:linear; dir:alternate; dur:120000; loop:true">
 			<a-image id="im0" position="0 1 -1.5" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.3" width="1.13" position="0 -0.09 -0.1"></a-plane>
 			</a-image>
@@ -33,10 +34,8 @@
 			<a-image id="im5" position="1.299 1 0.75" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.3" width="1.13" position="0 -0.09 -0.1"></a-plane>
 			</a-image>
-			<a-animation id="anim-sup" attribute="rotation" from="0 0 0" to="0 360 0" dur="120000" easing="linear" fill="forwards"
-			 repeat="indefinite"></a-animation>
 		</a-entity>
-		<a-entity id="anillo-inferior">
+		<a-entity id="anillo-inferior" animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 -360 0; easing:linear; dir:alternate; dur:120000; loop:true">
 			<a-image id="im6" position="0 2.2 -1.5" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.3" width="1.13" position="0 -0.09 -0.1"></a-plane>
 			</a-image>
@@ -55,8 +54,6 @@
 			<a-image id="im11" position="1.299 2.2 0.75" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.3" width="1.13" position="0 -0.09 -0.1"></a-plane>
 			</a-image>
-			<a-animation id="anim-inf" attribute="rotation" from="0 0 0" to="0 -360 0" dur="120000" easing="linear" fill="forwards"
-			 repeat="indefinite"></a-animation>
 		</a-entity>
 		<a-camera id="camera" wasd-controls-enabled="false" look-controls>
 			<a-text id="texto" value="Cargando" position="-0.6 0 -2" width="6" visible="true"></a-text>
@@ -70,57 +67,22 @@
 	var scene = document.querySelector('#scene');
 	var anillo_inf = document.querySelector("#anillo-inferior");
 	var anillo_sup = document.querySelector("#anillo-superior");
-
+	var currentEvent = 'rotation-pause'
 	var fotemp, im, url, rot_sup, rot_inf, touchCount = 0,
 		fotos, fotos_trim = []
 	var usuario = window.location.href.split('?')[1]
 
-	function control_anim() {
-		rot_sup = anillo_sup.getAttribute('rotation').y
-		rot_inf = anillo_inf.getAttribute('rotation').y
-		
-		
-		if (touchCount%2==1) {
-			anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
-			anillo_sup.lastElementChild.setAttribute('dur', '120000')
-			anillo_sup.lastElementChild.setAttribute('to', '0 360 0')
-			anillo_sup.lastElementChild.setAttribute('easing', 'linear')
-
-			anillo_inf.lastElementChild.setAttribute('from', '0 ' + rot_inf + ' 0')
-			anillo_inf.lastElementChild.setAttribute('dur', '120000')
-			anillo_inf.lastElementChild.setAttribute('to', '0 -360 0')
-			anillo_inf.lastElementChild.setAttribute('easing', 'linear')
-			window.setTimeout(sumar, 500);
-		} else {
-			anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
-			anillo_sup.lastElementChild.setAttribute('easing', 'ease-out')
-			anillo_sup.lastElementChild.setAttribute('to', '0 ' + (rot_sup + 0.5) + ' 0')
-			anillo_sup.lastElementChild.setAttribute('dur', '1000')
-
-			anillo_inf.lastElementChild.setAttribute('from', '0 ' + rot_inf + ' 0')
-			anillo_inf.lastElementChild.setAttribute('easing', 'ease-out')
-			anillo_inf.lastElementChild.setAttribute('to', '0 ' + (rot_inf - 0.5) + ' 0')
-			anillo_inf.lastElementChild.setAttribute('dur', '1000')
-			window.setTimeout(parar, 500);
+	function anim_control() {
+		anillo_sup.dispatchEvent(new CustomEvent(currentEvent))
+		anillo_inf.dispatchEvent(new CustomEvent(currentEvent))
+		switch (currentEvent) {
+			case 'rotation-resume':
+				currentEvent = 'rotation-pause'
+				break
+			case 'rotation-pause':
+				currentEvent = 'rotation-resume'
+				break
 		}
-	}
-
-	function sumar() {
-		touchCount++;
-		if(anillo_sup.lastElementChild.getAttribute('dur')==1000 && touchCount%2==0){
-			touchCount++;
-		}
-	}
-
-	function parar() {
-		rot_sup = anillo_sup.getAttribute('rotation').y
-		rot_inf = anillo_inf.getAttribute('rotation').y
-		anillo_sup.lastElementChild.setAttribute('to', '0 ' + rot_sup + ' 0')
-		anillo_inf.lastElementChild.setAttribute('to', '0 ' + rot_inf + ' 0')
-		anillo_inf.lastElementChild.setAttribute('from', '0 ' + rot_inf + ' 0')
-		anillo_sup.lastElementChild.setAttribute('from', '0 ' + rot_sup + ' 0')
-		sumar();
-		
 	}
 
 	if (usuario !== undefined) {
@@ -131,10 +93,16 @@
 		Http.onreadystatechange = function () {
 			if (this.readyState == 4 && (this.status == 200 || this.status == 404)) {
 				if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-					scene.addEventListener('touchend', control_anim);
+					scene.addEventListener('touchend', anim_control);
 				} else {
-					scene.addEventListener('dblclick', control_anim);
+					scene.addEventListener('dblclick', anim_control);
 				}
+
+				document.getElementById('anillo-inferior').addEventListener('pause', function () {
+					document.querySelector('a-animation').setAttribute('from', AFRAME.utils.coordinates.stringify(this.getAttribute(
+						'rotation')))
+				})
+
 				fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
 				if (fotos !== null) {
 					fotos.forEach(function (foto) {
@@ -145,6 +113,7 @@
 						im = document.querySelector("#im" + i)
 						im.setAttribute("src", fotos_trim[i])
 						im.setAttribute("visible", "true")
+						im.removeAttribute('look-at')
 					}
 					document.querySelector("#skybox").setAttribute("color", "white")
 					txt.setAttribute("visible", "false")
