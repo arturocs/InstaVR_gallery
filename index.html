@@ -86,7 +86,7 @@
 	}
 
 	if (usuario !== undefined) {
-		url = 'https://www.instagram.com/' + usuario
+		url = 'https://www.instagram.com/' + usuario + '?__a=1'
 		const Http = new XMLHttpRequest();
 		Http.open("GET", url);
 		Http.send();
@@ -102,7 +102,7 @@
 					document.querySelector('a-animation').setAttribute('from', AFRAME.utils.coordinates.stringify(this.getAttribute(
 						'rotation')))
 				})
-
+				console.log(Http)
 				fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
 				if (fotos !== null) {
 					fotos.forEach(function (foto) {
