@@ -85,13 +85,24 @@
 		}
 	}
 
+	async function jsonPetition(usuario) {
+    const rawResponse = await fetch("https://www.instagram.com/"+usuario+"/?__a=1", {
+        "headers": {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3",
+        },
+        "method": "GET",
+        "mode": "cors"
+    });
+    const content = await rawResponse.json();
+    return new Promise(resolve => {
+        resolve(content);
+    });
+}
+
 	if (usuario !== undefined) {
-		url = 'https://www.instagram.com/' + usuario + '?__a=1'
-		const Http = new XMLHttpRequest();
-		Http.open("GET", url);
-		Http.send();
-		Http.onreadystatechange = function () {
-			if (this.readyState == 4 && (this.status == 200 || this.status == 404)) {
+		jsonPetition(usuario).then(
+		(Http) => {
 				if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 					scene.addEventListener('touchend', anim_control);
 				} else {
@@ -102,12 +113,11 @@
 					document.querySelector('a-animation').setAttribute('from', AFRAME.utils.coordinates.stringify(this.getAttribute(
 						'rotation')))
 				})
-				console.log(Http)
-				fotos = Http.responseText.match(/"thumbnail_src":"[^"]*"/g)
+				fotos = JSON.stringify(Http).match(/"thumbnail_src":"[^"]*"/g)
 				if (fotos !== null) {
 					fotos.forEach(function (foto) {
 						fotemp = foto.split(':\"')[1]
-						fotos_trim.push(fotemp.substring(0, fotemp.length - 1))
+						fotos_trim.push("https://cors-anywhere.herokuapp.com/"+fotemp.substring(0, fotemp.length - 1))
 					})
 					for (var i = 0; i < fotos_trim.length; i++) {
 						im = document.querySelector("#im" + i)
@@ -121,8 +131,8 @@
 					txt.setAttribute("position", "-0.2 0 -2")
 					txt.setAttribute("value", "Error")
 				}
-			}
-		}
+			//}
+		})
 	} else {
 		txt.setAttribute("position", "-0.2 0 -2")
 		txt.setAttribute("value", "Error")
