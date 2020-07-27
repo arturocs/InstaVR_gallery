@@ -14,7 +14,8 @@
 			<img id="sky" src="./sky.jpg">
 		</a-assets>
 		<a-light type="ambient" color="white"></a-light>
-		<a-entity id="anillo-superior" animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 360 0; easing:linear; dir:alternate; dur:120000; loop:true">
+		<a-entity id="anillo-superior"
+			animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 360 0; easing:linear; dir:alternate; dur:120000; loop:true">
 			<a-image id="im0" position="0 1 -1.5" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.13" width="1.13" position="0 0 -0.1"></a-plane>
 			</a-image>
@@ -34,7 +35,8 @@
 				<a-plane color="#d3d3d3" height="1.13" width="1.13" position="0 0 -0.1"></a-plane>
 			</a-image>
 		</a-entity>
-		<a-entity id="anillo-inferior" animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 -360 0; easing:linear; dir:alternate; dur:120000; loop:true">
+		<a-entity id="anillo-inferior"
+			animation="property:rotation; pauseEvents: rotation-pause; resumeEvents: rotation-resume; to:0 -360 0; easing:linear; dir:alternate; dur:120000; loop:true">
 			<a-image id="im6" position="0 2.2 -1.5" src="" visible="false" look-at="#camera">
 				<a-plane color="#d3d3d3" height="1.13" width="1.13" position="0 0 -0.1"></a-plane>
 			</a-image>
@@ -62,15 +64,6 @@
 </body>
 
 <script>
-	var txt = document.querySelector("#texto")
-	var scene = document.querySelector('#scene');
-	var anillo_inf = document.querySelector("#anillo-inferior");
-	var anillo_sup = document.querySelector("#anillo-superior");
-	var currentEvent = 'rotation-pause'
-	var fotemp, im, url, rot_sup, rot_inf, touchCount = 0,
-		fotos, fotos_trim = []
-	var usuario = window.location.href.split('?')[1]
-
 	function anim_control() {
 		anillo_sup.dispatchEvent(new CustomEvent(currentEvent))
 		anillo_inf.dispatchEvent(new CustomEvent(currentEvent))
@@ -85,23 +78,30 @@
 	}
 
 	async function jsonPetition(usuario) {
-    const rawResponse = await fetch("https://www.instagram.com/"+usuario+"/?__a=1", {
-        "headers": {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Language": "es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3",
-        },
-        "method": "GET",
-        "mode": "cors"
-    });
-    const content = await rawResponse.json();
-    return new Promise(resolve => {
-        resolve(content);
-    });
-}
+		const rawResponse = await fetch("https://www.instagram.com/" + usuario + "/?__a=1", {
+			"headers": {
+				"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+				"Accept-Language": "es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3",
+			},
+			"method": "GET",
+			"mode": "cors"
+		});
+		const content = await rawResponse.json();
+		return new Promise(resolve => {
+			resolve(content);
+		});
+	}
+
+	var txt = document.querySelector("#texto")
+	var scene = document.querySelector('#scene');
+	var anillo_inf = document.querySelector("#anillo-inferior");
+	var anillo_sup = document.querySelector("#anillo-superior");
+	var currentEvent = 'rotation-pause'
+	var usuario = window.location.href.split('?')[1]
 
 	if (usuario !== undefined) {
 		jsonPetition(usuario).then(
-		(Http) => {
+			(json) => {
 				if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 					scene.addEventListener('touchend', anim_control);
 				} else {
@@ -112,30 +112,27 @@
 					document.querySelector('a-animation').setAttribute('from', AFRAME.utils.coordinates.stringify(this.getAttribute(
 						'rotation')))
 				})
-				fotos = JSON.stringify(Http).match(/"thumbnail_src":"[^"]*"/g)
-				if (fotos !== null) {
-					fotos.forEach(function (foto) {
-						fotemp = foto.split(':\"')[1]
-						fotos_trim.push(fotemp.substring(0, fotemp.length - 1))
-					})
-					for (var i = 0; i < fotos_trim.length; i++) {
+				var fotos = []
+				var edges = json.graphql.user.edge_owner_to_timeline_media.edges
+				if (edges !== null) {
+					edges.forEach((edge) => { fotos.push(edge.node.thumbnail_src) })
+					for (var i = 0; i < fotos.length; i++) {
 						im = document.querySelector("#im" + i)
-						im.setAttribute("src", fotos_trim[i])
+						im.setAttribute("src", fotos[i])
 						im.setAttribute("visible", "true")
 						im.removeAttribute('look-at')
 					}
 					document.querySelector("#skybox").setAttribute("color", "white")
 					txt.setAttribute("visible", "false")
 				} else {
-					txt.setAttribute("position", "-0.2 0 -2")
+					txt.setAttribute("position", "-2 0 -2")
 					txt.setAttribute("value", "Error")
 				}
-			//}
-		})
+
+			})
 	} else {
 		txt.setAttribute("position", "-0.2 0 -2")
 		txt.setAttribute("value", "Error")
-		console.log("Usuario sin definir")
 	}
 </script>
 
